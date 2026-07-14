@@ -1,15 +1,15 @@
 const CACHE_NAME = 'cronometro-reuniao-v1';
 const LOCAL_ASSETS = [
-  './',
+  '/',
   '/index.html',
-  './presentation.html',
-  './style.css',
-  './script.js',
-  './presentation.js',
-  './config.js',
-  './manifest.webmanifest',
-  './icons/icon.svg',
-  './reset-cache.html'
+  '/presentation.html',
+  '/style.css',
+  '/script.js',
+  '/presentation.js',
+  '/config.js',
+  '/manifest.webmanifest',
+  '/icons/icon.svg',
+  '/reset-cache.html'
 ];
 
 self.addEventListener('install', (event) => {

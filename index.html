@@ -13,7 +13,7 @@
 
 <script>
 (function(){
-  var VERSION='cronometro-inline-2026-07-14-v1';
+  var VERSION='cronometro-inline-2026-07-14-v2';
   try {
     if (localStorage.getItem('cronometro_inline_version') !== VERSION) {
       localStorage.setItem('cronometro_inline_version', VERSION);
@@ -138,11 +138,11 @@ h1{font-weight:600;font-size:clamp(24px,4vw,34px);margin:0;line-height:1.05}
 @keyframes overtimeFlash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 5px rgba(255,120,120,.45) inset}}
 .ring-box{position:relative;width:180px;height:180px;flex:none}.ring{transform:rotate(-90deg)}.ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}.ring-fg{fill:none;stroke:var(--gold);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .2s linear,stroke .2s}.ring-fg.warning{stroke:#e3a73c}.ring-fg.overtime{stroke:#ef7777}.ring-time{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',Georgia,serif;font-size:34px;font-weight:600;font-variant-numeric:tabular-nums}
 .stage-info{flex:1;min-width:220px}.section-tag{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px}.tag-tesouros{background:var(--tesouros-soft);color:var(--tesouros)}.tag-ministerio{background:var(--ministerio-soft);color:var(--ministerio)}.tag-vida{background:var(--vida-soft);color:var(--vida)}.tag-neutro{background:var(--neutro-soft);color:#3a3427}
-.part-name{font-family:'Fraunces',Georgia,serif;font-size:clamp(19px,2.6vw,26px);font-weight:600;margin:0 0 6px;line-height:1.15}.part-meta{font-size:13px;color:#c7cfdb;margin-bottom:6px;line-height:1.45}.part-speaker{font-size:13px;color:#e5ba60;margin:0 0 16px;font-weight:600}.controls{display:flex;gap:10px;flex-wrap:wrap}
+.part-name{font-family:'Fraunces',Georgia,serif;font-size:clamp(19px,2.6vw,26px);font-weight:600;margin:0 0 6px;line-height:1.15}.part-meta{font-size:13px;color:#c7cfdb;margin-bottom:6px;line-height:1.45;white-space:pre-line}.part-speaker{font-size:13px;color:#e5ba60;margin:0 0 16px;font-weight:600}.controls{display:flex;gap:10px;flex-wrap:wrap}
 button,.anchor-button{font-weight:600;font-size:14px;cursor:pointer;border-radius:9px;border:none;padding:10px 16px;transition:transform .1s,filter .15s,background .15s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}button:active,.anchor-button:active{transform:scale(.97)}button:disabled{opacity:.45;cursor:not-allowed}.btn-primary{background:var(--gold);color:#241c07}.btn-primary:hover{filter:brightness(1.08)}.btn-ghost{background:rgba(255,255,255,.1);color:var(--paper)}.btn-ghost:hover{background:rgba(255,255,255,.18)}.btn-paper{background:var(--paper-2);color:var(--navy)}.btn-paper:hover{filter:brightness(.97)}.nav-btns{display:flex;gap:8px;margin-left:auto}.icon-btn{background:rgba(255,255,255,.1);color:var(--paper);padding:10px 12px}.icon-btn:hover{background:rgba(255,255,255,.18)}
 
 .plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}.sec-header{cursor:default;font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;padding:10px 14px;border-radius:8px;margin-top:8px}.sec-header-tesouros{background:var(--tesouros-soft);color:var(--tesouros)}.sec-header-ministerio{background:var(--ministerio-soft);color:var(--ministerio)}.sec-header-vida{background:var(--vida-soft);color:var(--vida)}
-.plist li.li-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer;flex-wrap:wrap;background:var(--paper-2);border-radius:10px;padding:10px 10px 10px 14px;border-left:5px solid var(--neutro)}.plist li.li-tesouros{border-left-color:var(--tesouros)}.plist li.li-ministerio{border-left-color:var(--ministerio)}.plist li.li-vida{border-left-color:var(--vida)}.plist li.li-active{background:#fff;box-shadow:0 0 0 2px var(--gold) inset}.plist li.li-done{opacity:.63}.li-left{flex:1;display:flex;align-items:flex-start;gap:10px;min-width:0;padding-top:2px}.li-main{display:flex;flex-direction:column;gap:3px;min-width:0}.li-name{font-size:14px;font-weight:600}.li-details{font-size:12px;color:var(--neutro);line-height:1.4}.li-details a{color:var(--tesouros);text-decoration:underline;margin-left:4px}.li-check{width:16px;text-align:center;font-size:14px;color:var(--good);flex:none}.li-comment-badge{font-size:11px;color:var(--gold);font-weight:700;margin-left:4px}
+.plist li.li-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer;flex-wrap:wrap;background:var(--paper-2);border-radius:10px;padding:10px 10px 10px 14px;border-left:5px solid var(--neutro)}.plist li.li-tesouros{border-left-color:var(--tesouros)}.plist li.li-ministerio{border-left-color:var(--ministerio)}.plist li.li-vida{border-left-color:var(--vida)}.plist li.li-active{background:#fff;box-shadow:0 0 0 2px var(--gold) inset}.plist li.li-done{opacity:.63}.li-left{flex:1;display:flex;align-items:flex-start;gap:10px;min-width:0;padding-top:2px}.li-main{display:flex;flex-direction:column;gap:3px;min-width:0}.li-name{font-size:14px;font-weight:600}.li-details{font-size:12px;color:var(--neutro);line-height:1.5;white-space:pre-line}.li-details a{color:var(--tesouros);text-decoration:underline;margin-left:4px}.li-check{width:16px;text-align:center;font-size:14px;color:var(--good);flex:none}.li-comment-badge{font-size:11px;color:var(--gold);font-weight:700;margin-left:4px}
 .li-trigger{margin-left:auto;flex:none;display:flex;align-items:center;gap:8px;background:var(--navy);border-radius:20px;padding:5px 6px 5px 14px}.li-countdown{font-family:'Fraunces',Georgia,serif;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600;color:var(--paper);min-width:62px;text-align:right}.li-countdown.warning{color:#ffd98f}.li-countdown.overtime{color:#ff9d9d}.li-playbtn{width:30px;height:30px;border-radius:50%;border:none;flex:none;background:var(--gold);color:#241c07;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0}.li-playbtn:hover{filter:brightness(1.08)}.li-active .li-playbtn{background:#fff}
 .li-speaker,.li-counsel{flex-basis:100%;display:flex;align-items:center;gap:10px;margin-top:9px;padding-top:9px;border-top:1px dashed #cfc6b0;cursor:default}.li-speaker span,.li-counsel{font-size:12px;color:var(--neutro)}.li-speaker input{flex:1;min-width:100px;border:1px solid #cfc6b0;border-radius:6px;padding:6px 9px;background:#fff;color:var(--ink)}.li-speaker input:focus{border-color:var(--gold)}.lc-time{font-family:'Fraunces',Georgia,serif;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ministerio);min-width:52px}.lc-time.overtime{color:var(--danger)}.lc-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--ministerio-soft);color:var(--ministerio);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0}.lc-reset{background:var(--neutro-soft);color:var(--neutro)}
 
@@ -190,7 +190,7 @@ footer{margin-top:30px;font-size:12px;color:var(--neutro);text-align:center;disp
         <div class="field">
           <label for="startTimeInput">Início às</label>
           <input type="time" id="startTimeInput" value="19:30">
-          <button class="clock-trigger" id="startTrigger" type="button" title="Definir o início real como agora" aria-label="Definir início como agora">▶</button>
+          <button class="clock-trigger" id="startTrigger" type="button" title="Forçar o início agora, somente se o disparo automático falhar" aria-label="Forçar início da reunião agora">▶</button>
         </div>
         <div class="field">
           <label for="durH">Duração</label>
@@ -388,12 +388,14 @@ window.CRONOMETRO_CONFIG = {
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'cronometro_vida_ministerio_state_v3';
-  const HISTORY_KEY = 'cronometro_vida_ministerio_history_v3';
-  const PRESENTATION_KEY = 'cronometro_vida_ministerio_presentation_v3';
-  const CHANNEL_NAME = 'cronometro_vida_ministerio_channel';
-  const STATE_VERSION = 3;
+  const STORAGE_KEY = 'cronometro_vida_ministerio_state_v4';
+  const HISTORY_KEY = 'cronometro_vida_ministerio_history_v4';
+  const PRESENTATION_KEY = 'cronometro_vida_ministerio_presentation_v4';
+  const CHANNEL_NAME = 'cronometro_vida_ministerio_channel_v4';
+  const STATE_VERSION = 4;
   const COUNSEL_LIMIT_MS = 90_000;
+  const TIME_TOLERANCE_MS = 5_000;
+  const JEWELS_OPEN_QUESTION = 'Que joias espirituais você encontrou na leitura da Bíblia desta semana?';
   const SAVE_DELAY_MS = 220;
   const CLOUD_SAVE_DELAY_MS = 1200;
 
@@ -444,6 +446,28 @@ window.CRONOMETRO_CONFIG = {
     }
   }
 
+  function displayDetails(item) {
+    if (!item) return '';
+    const first = String(item.details || '').trim();
+    if (!item.countComments) return first;
+    const lines = [];
+    if (first) lines.push(`1º ${first}`);
+    lines.push(`2º ${JEWELS_OPEN_QUESTION}`);
+    return lines.join('\n');
+  }
+
+  function evaluationEmoji(value) {
+    return value === 'good' ? '👍🏾' : value === 'bad' ? '👎🏿' : '';
+  }
+
+  function evaluationLabel(value) {
+    return value === 'good'
+      ? 'Dentro da margem de 5 segundos'
+      : value === 'bad'
+        ? 'Fora da margem de 5 segundos'
+        : 'Não avaliado';
+  }
+
   function part(section, name, min, extra = {}) {
     return {
       id: uid(),
@@ -461,10 +485,12 @@ window.CRONOMETRO_CONFIG = {
 
   function defaultParts() {
     return [
-      part('neutro', 'Cântico e comentários iniciais', 1),
-      part('neutro', 'Oração inicial', 1),
+      part('neutro', 'Cântico 44 e oração | Comentários iniciais', 1),
       part('tesouros', '1. Discurso', 10),
-      part('tesouros', '2. Joias espirituais', 10, { countComments: true }),
+      part('tesouros', '2. Joias espirituais', 10, {
+        details: 'Jer. 20:12 — O que esse versículo nos incentiva a fazer? (w13 15/3 10 § 11)',
+        countComments: true
+      }),
       part('tesouros', '3. Leitura da Bíblia', 4, { hasCounsel: true }),
       part('ministerio', '4. Iniciando conversas', 3, { hasCounsel: true }),
       part('ministerio', '5. Cultivando o interesse', 4, { hasCounsel: true }),
@@ -472,8 +498,7 @@ window.CRONOMETRO_CONFIG = {
       part('vida', 'Cântico (intervalo)', 3),
       part('vida', '7. Necessidades locais / parte da Vida Cristã', 15),
       part('vida', '8. Estudo bíblico de congregação', 30),
-      part('neutro', 'Comentários finais', 2),
-      part('neutro', 'Oração final', 1)
+      part('neutro', 'Comentários finais | Cântico 31 e oração', 3)
     ];
   }
 
@@ -486,7 +511,9 @@ window.CRONOMETRO_CONFIG = {
       alarmStage: 0,
       counselElapsedMs: 0,
       counselRunningSince: null,
-      counselAlarmFired: false
+      counselAlarmFired: false,
+      evaluation: null,
+      evaluatedAt: null
     };
   }
 
@@ -496,7 +523,7 @@ window.CRONOMETRO_CONFIG = {
     return {
       version: STATE_VERSION,
       meetingId: uid(),
-      weekLabel: 'Semana da reunião',
+      weekLabel: 'Semana da reunião · Jeremias 20',
       scheduledStartTime: '19:30',
       allowedMinutes: 105,
       actualStartAt: null,
@@ -547,7 +574,9 @@ window.CRONOMETRO_CONFIG = {
         alarmStage: Math.max(0, Math.min(3, Math.floor(Number(source.alarmStage) || 0))),
         counselElapsedMs: Math.max(0, Number(source.counselElapsedMs) || 0),
         counselRunningSince: Number.isFinite(Number(source.counselRunningSince)) ? Number(source.counselRunningSince) : null,
-        counselAlarmFired: Boolean(source.counselAlarmFired)
+        counselAlarmFired: Boolean(source.counselAlarmFired),
+        evaluation: ['good', 'bad'].includes(source.evaluation) ? source.evaluation : null,
+        evaluatedAt: Number.isFinite(Number(source.evaluatedAt)) ? Number(source.evaluatedAt) : null
       };
     }
 
@@ -783,15 +812,15 @@ window.CRONOMETRO_CONFIG = {
       li.dataset.partId = item.id;
       li.innerHTML = `
         <div class="li-left">
-          <span class="li-check">${timer.completed ? '✓' : ''}</span>
+          <span class="li-check" title="${esc(evaluationLabel(timer.evaluation))}">${evaluationEmoji(timer.evaluation) || (timer.completed ? '✓' : '')}</span>
           <div class="li-main">
             <span class="li-name">${esc(item.name)}${item.countComments ? `<span class="li-comment-badge">💬 ${timer.comments}</span>` : ''}</span>
-            ${item.details ? `<div class="li-details">${esc(item.details)}${link ? ` <a href="${esc(link)}" target="_blank" rel="noopener noreferrer">🔗 referência</a>` : ''}</div>` : ''}
+            ${displayDetails(item) ? `<div class="li-details">${esc(displayDetails(item))}${link ? ` <a href="${esc(link)}" target="_blank" rel="noopener noreferrer">🔗 referência</a>` : ''}</div>` : ''}
           </div>
         </div>
         <div class="li-trigger">
           <span class="li-countdown ${getStatusClass(remaining)}" id="cd-${item.id}">${formatCountdown(remaining)}</span>
-          <button class="li-playbtn" type="button" data-action="play" title="${running ? 'Pausar' : 'Iniciar'}">${running ? '⏸' : '▶'}</button>
+          <button class="li-playbtn" type="button" data-action="play" title="${running ? 'Parar e avaliar' : 'Iniciar'}">${running ? '■' : '▶'}</button>
         </div>
         <div class="li-speaker">
           <span>🗣️ Orador</span>
@@ -864,15 +893,17 @@ window.CRONOMETRO_CONFIG = {
 
     $('sectionTag').textContent = SECTION_LABELS[item.section];
     $('sectionTag').className = `section-tag tag-${item.section}`;
-    $('partName').textContent = item.name;
-    $('partMeta').textContent = `Parte ${index + 1} de ${state.parts.length} · duração prevista: ${item.min} min${item.details ? ` · ${item.details}` : ''}`;
+    const resultEmoji = evaluationEmoji(timer.evaluation);
+    $('partName').textContent = `${item.name}${resultEmoji ? ` ${resultEmoji}` : ''}`;
+    const details = displayDetails(item);
+    $('partMeta').textContent = `Parte ${index + 1} de ${state.parts.length} · duração prevista: ${item.min} min${details ? `\n${details}` : ''}`;
     $('partSpeaker').textContent = item.speaker ? `🗣️ ${item.speaker}` : '';
     $('ringTime').textContent = formatCountdown(remaining);
     $('ringFg').style.strokeDasharray = String(circumference);
     $('ringFg').style.strokeDashoffset = String(circumference * (1 - progress));
     $('ringFg').className.baseVal = `ring-fg ${status}`.trim();
     $('stage').className = `stage ${status}`.trim();
-    $('playBtn').textContent = timer.runningSince ? '⏸ Pausar' : (timer.elapsedMs ? '▶ Continuar' : '▶ Iniciar');
+    $('playBtn').textContent = timer.runningSince ? '■ Parar' : (timer.elapsedMs ? '▶ Continuar' : '▶ Iniciar');
     $('playBtn').disabled = false;
     $('prevBtn').disabled = index <= 0;
     $('nextBtn').disabled = index >= state.parts.length - 1;
@@ -952,7 +983,7 @@ window.CRONOMETRO_CONFIG = {
       cd.className = `li-countdown ${status}`.trim();
     }
     const play = document.querySelector(`[data-part-id="${CSS.escape(item.id)}"] [data-action="play"]`);
-    if (play) play.textContent = timer.runningSince ? '⏸' : '▶';
+    if (play) play.textContent = timer.runningSince ? '■' : '▶';
 
     if (item.hasCounsel) {
       const counselRemaining = COUNSEL_LIMIT_MS - counselElapsedMsFor(item.id, at);
@@ -964,45 +995,74 @@ window.CRONOMETRO_CONFIG = {
     }
   }
 
-  function pausePart(partId) {
+  function pausePart(partId, at = nowMs()) {
     const timer = state.timers[partId];
     if (!timer?.runningSince) return;
-    timer.elapsedMs += Math.max(0, nowMs() - timer.runningSince);
+    timer.elapsedMs += Math.max(0, at - timer.runningSince);
     timer.runningSince = null;
   }
 
-  function pauseAllParts(exceptId = null) {
+  function pauseAllParts(exceptId = null, at = nowMs()) {
     Object.entries(state.timers).forEach(([id, timer]) => {
-      if (id !== exceptId && timer.runningSince) pausePart(id);
+      if (id !== exceptId && timer.runningSince) pausePart(id, at);
     });
   }
 
-  function startCurrentPart() {
+  function evaluatePart(partId, at = nowMs()) {
+    const item = state.parts.find((candidate) => candidate.id === partId);
+    const timer = state.timers[partId];
+    if (!item || !timer || plannedMs(item) <= 0 || elapsedMsFor(partId, at) <= 0) {
+      if (timer) {
+        timer.evaluation = null;
+        timer.evaluatedAt = null;
+      }
+      return null;
+    }
+    const difference = elapsedMsFor(partId, at) - plannedMs(item);
+    timer.evaluation = Math.abs(difference) <= TIME_TOLERANCE_MS ? 'good' : 'bad';
+    timer.evaluatedAt = at;
+    return timer.evaluation;
+  }
+
+  function showEvaluation(result) {
+    if (!result) return;
+    const emoji = evaluationEmoji(result);
+    toast(`${emoji} ${evaluationLabel(result)}.`, result === 'good' ? 'success' : 'error');
+  }
+
+  function startCurrentPart(at = nowMs()) {
     const item = currentPart();
     if (!item) return;
-    pauseAllParts(item.id);
+    pauseAllParts(item.id, at);
     const timer = state.timers[item.id];
     if (timer.runningSince) return;
-    timer.runningSince = nowMs();
+    timer.runningSince = at;
     timer.completed = false;
+    timer.evaluation = null;
+    timer.evaluatedAt = null;
     clearTimeout(autoNextTimeout);
     requestWakeLock();
     if (state.settings.autoFloatEnabled) openFloat();
     markChanged({ render: true });
   }
 
-  function pauseCurrentPart() {
+  function stopCurrentPart() {
     const item = currentPart();
     if (!item) return;
-    pausePart(item.id);
+    const at = nowMs();
+    pausePart(item.id, at);
+    const timer = state.timers[item.id];
+    timer.completed = true;
+    const result = evaluatePart(item.id, at);
     markChanged({ render: true });
+    showEvaluation(result);
     releaseWakeLockIfIdle();
   }
 
   function toggleCurrentPart() {
     const timer = currentTimer();
     if (!timer) return;
-    timer.runningSince ? pauseCurrentPart() : startCurrentPart();
+    timer.runningSince ? stopCurrentPart() : startCurrentPart();
   }
 
   function resetCurrentPart() {
@@ -1013,6 +1073,8 @@ window.CRONOMETRO_CONFIG = {
     timer.runningSince = null;
     timer.completed = false;
     timer.alarmStage = 0;
+    timer.evaluation = null;
+    timer.evaluatedAt = null;
     clearTimeout(autoNextTimeout);
     markChanged({ render: true });
     releaseWakeLockIfIdle();
@@ -1028,15 +1090,29 @@ window.CRONOMETRO_CONFIG = {
     releaseWakeLockIfIdle();
   }
 
-  function nextPart(auto = false) {
+  function nextPart() {
     const index = currentIndex();
     if (index < 0 || index >= state.parts.length - 1) return;
-    const timer = currentTimer();
-    pauseCurrentPart();
-    if (timer) timer.completed = true;
+    const currentItem = currentPart();
+    const at = nowMs();
+    pausePart(currentItem.id, at);
+    const currentPartTimer = state.timers[currentItem.id];
+    currentPartTimer.completed = true;
+    const result = evaluatePart(currentItem.id, at);
+
     state.currentPartId = state.parts[index + 1].id;
+    const nextTimer = currentTimer();
+    pauseAllParts(state.currentPartId, at);
+    nextTimer.runningSince = at;
+    nextTimer.completed = false;
+    nextTimer.evaluation = null;
+    nextTimer.evaluatedAt = null;
+    nextTimer.alarmStage = 0;
+    clearTimeout(autoNextTimeout);
+    requestWakeLock();
+    if (state.settings.autoFloatEnabled) openFloat();
     markChanged({ render: true });
-    if (auto) startCurrentPart();
+    showEvaluation(result);
   }
 
   function previousPart() {
@@ -1135,7 +1211,7 @@ window.CRONOMETRO_CONFIG = {
         markChanged();
         if (state.settings.autoNextEnabled && currentIndex() < state.parts.length - 1) {
           clearTimeout(autoNextTimeout);
-          autoNextTimeout = setTimeout(() => nextPart(true), 2500);
+          autoNextTimeout = setTimeout(nextPart, 2500);
         }
       }
     }
@@ -1156,6 +1232,20 @@ window.CRONOMETRO_CONFIG = {
     const date = new Date();
     date.setHours(hours || 0, minutes || 0, 0, 0);
     return date;
+  }
+
+  function processAutomaticMeetingStart(at = nowMs()) {
+    if (state.actualStartAt) return;
+    const scheduled = scheduledStartDate().getTime();
+    if (at < scheduled) return;
+    state.actualStartAt = scheduled;
+    const card = $('clockcard');
+    card.classList.add('ring-alert');
+    setTimeout(() => card.classList.remove('ring-alert'), 3200);
+    beep('final');
+    vibrate([150, 80, 150]);
+    markChanged({ render: true });
+    toast('A reunião foi iniciada automaticamente no horário programado.', 'success');
   }
 
   function renderMeetingClock(at = nowMs()) {
@@ -1183,7 +1273,7 @@ window.CRONOMETRO_CONFIG = {
     const now = new Date(state.actualStartAt);
     state.scheduledStartTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     markChanged({ render: true });
-    toast('Início real definido como agora.', 'success');
+    toast('Início forçado manualmente. Use este botão apenas se o automático falhar.', 'success');
   }
 
   function openFloat() {
@@ -1209,14 +1299,15 @@ window.CRONOMETRO_CONFIG = {
     const status = getStatusClass(remaining);
     $('floatWeek').textContent = state.weekLabel;
     $('floatSection').textContent = SECTION_LABELS[item.section];
-    $('floatName').textContent = item.name;
+    const floatResult = evaluationEmoji(state.timers[item.id]?.evaluation);
+    $('floatName').textContent = `${item.name}${floatResult ? ` ${floatResult}` : ''}`;
     $('floatSpeaker').textContent = item.speaker ? `🗣️ ${item.speaker}` : '';
     $('floatTime').textContent = formatCountdown(remaining);
     $('floatTime').className = `float-time ${status}`.trim();
     $('floatRingFg').style.strokeDasharray = String(circumference);
     $('floatRingFg').style.strokeDashoffset = String(circumference * (1 - progress));
     $('floatRingFg').className.baseVal = `ring-fg ${status}`.trim();
-    $('floatPlay').textContent = currentTimer()?.runningSince ? '⏸ Pausar' : '▶ Continuar';
+    $('floatPlay').textContent = currentTimer()?.runningSince ? '■ Parar' : '▶ Continuar';
   }
 
   async function requestWakeLock() {
@@ -1260,10 +1351,53 @@ window.CRONOMETRO_CONFIG = {
 
   function parseProgramText(raw) {
     const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-    const result = [];
+    const entries = [];
+    const usedSongIndexes = new Set();
+    const lineSections = [];
     let section = 'neutro';
     let weekLabel = null;
-    const used = new Set();
+
+    const isSectionHeading = (normalized) =>
+      normalized.includes('TESOUROS DA PALAVRA') ||
+      normalized.includes('MELHOR NO MINISTERIO') ||
+      normalized.includes('NOSSA VIDA CRISTA');
+
+    const songNumber = (line) => {
+      const match = line.match(/C[ÂA]NTICO\s+(\d+)/i);
+      return match ? match[1] : null;
+    };
+
+    const songWithPrayer = (line) => {
+      const number = songNumber(line);
+      return number ? `Cântico ${number} e oração` : '';
+    };
+
+    for (let index = 0; index < lines.length; index += 1) {
+      const normalized = normalizeText(lines[index]);
+      if (normalized.includes('TESOUROS DA PALAVRA')) section = 'tesouros';
+      else if (normalized.includes('MELHOR NO MINISTERIO')) section = 'ministerio';
+      else if (normalized.includes('NOSSA VIDA CRISTA')) section = 'vida';
+      lineSections[index] = section;
+    }
+
+    const findSong = (from, to, direction = 1) => {
+      for (let index = from; direction > 0 ? index <= to : index >= to; index += direction) {
+        if (index < 0 || index >= lines.length) continue;
+        if (songNumber(lines[index])) return index;
+      }
+      return -1;
+    };
+
+    const findQuestionAfter = (from) => {
+      for (let index = from + 1; index < Math.min(lines.length, from + 20); index += 1) {
+        const candidate = lines[index];
+        const normalized = normalizeText(candidate);
+        if (isSectionHeading(normalized) || /\(\d{1,3}\s*min\)/i.test(candidate)) break;
+        if (normalized === 'SUA RESPOSTA' || normalized.includes('QUE JOIAS ESPIRITUAIS VOCE ENCONTROU')) continue;
+        if (candidate.includes('?')) return candidate;
+      }
+      return '';
+    };
 
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index];
@@ -1272,40 +1406,75 @@ window.CRONOMETRO_CONFIG = {
       if (!weekLabel && /\d/.test(line) && /DE\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)/.test(normalized) && line.length < 70) {
         weekLabel = line;
       }
-      if (normalized.includes('TESOUROS DA PALAVRA')) { section = 'tesouros'; continue; }
-      if (normalized.includes('MELHOR NO MINISTERIO')) { section = 'ministerio'; continue; }
-      if (normalized.includes('NOSSA VIDA CRISTA')) { section = 'vida'; continue; }
+      if (isSectionHeading(normalized)) continue;
 
       const match = line.match(/\((\d{1,3})\s*min\)/i);
       if (!match) continue;
 
-      const minutes = Number(match[1]);
+      let minutes = Number(match[1]);
       const before = line.slice(0, match.index).trim();
       const after = line.slice(match.index + match[0].length).replace(/^\s*[|–—-]\s*/, '').trim();
       let title = before;
 
       if (!title) {
-        for (let previous = index - 1; previous >= 0; previous -= 1) {
-          if (used.has(previous)) continue;
+        for (let previous = index - 1; previous >= Math.max(0, index - 6); previous -= 1) {
           const candidate = lines[previous];
           const candidateNormalized = normalizeText(candidate);
-          if (candidateNormalized.includes('TESOUROS DA PALAVRA') || candidateNormalized.includes('MELHOR NO MINISTERIO') || candidateNormalized.includes('NOSSA VIDA CRISTA')) break;
-          if (/\(\d{1,3}\s*min\)/i.test(candidate)) break;
+          if (isSectionHeading(candidateNormalized) || /\(\d{1,3}\s*min\)/i.test(candidate)) break;
+          if (candidateNormalized === 'SUA RESPOSTA' || songNumber(candidate)) continue;
           title = candidate;
-          used.add(previous);
           break;
         }
       }
 
       title ||= 'Parte sem título';
       const normalizedTitle = normalizeText(title);
-      result.push(part(section, title, minutes, {
-        details: after,
-        countComments: normalizedTitle.includes('JOIAS ESPIRITUAIS'),
-        hasCounsel: section === 'ministerio' || normalizedTitle.includes('LEITURA DA BIBLIA')
-      }));
+      const itemSection = lineSections[index] || 'neutro';
+      let details = after;
+      let finalSection = itemSection;
+
+      if (normalizedTitle.includes('COMENTARIOS INICIAIS')) {
+        const songIndex = findSong(index - 1, Math.max(0, index - 8), -1);
+        if (songIndex >= 0) usedSongIndexes.add(songIndex);
+        title = `${songIndex >= 0 ? songWithPrayer(lines[songIndex]) : 'Cântico e oração'} | Comentários iniciais`;
+        minutes = 1;
+        finalSection = 'neutro';
+      }
+
+      if (normalizedTitle.includes('COMENTARIOS FINAIS')) {
+        const songIndex = findSong(index + 1, Math.min(lines.length - 1, index + 8), 1);
+        if (songIndex >= 0) usedSongIndexes.add(songIndex);
+        title = `Comentários finais | ${songIndex >= 0 ? songWithPrayer(lines[songIndex]) : 'Cântico e oração'}`;
+        minutes = 3;
+        finalSection = 'neutro';
+      }
+
+      const titleNormalizedAfterComposition = normalizeText(title);
+      const isJewels = titleNormalizedAfterComposition.includes('JOIAS ESPIRITUAIS');
+      if (isJewels) {
+        details = findQuestionAfter(index) || after;
+      }
+
+      entries.push({
+        sourceIndex: index,
+        item: part(finalSection, title, minutes, {
+          details,
+          countComments: isJewels,
+          hasCounsel: finalSection === 'ministerio' || titleNormalizedAfterComposition.includes('LEITURA DA BIBLIA')
+        })
+      });
     }
-    return { weekLabel, parts: result };
+
+    lines.forEach((line, index) => {
+      if (usedSongIndexes.has(index)) return;
+      const number = songNumber(line);
+      if (!number || lineSections[index] !== 'vida') return;
+      const alreadyIncluded = entries.some((entry) => Math.abs(entry.sourceIndex - index) <= 1 && normalizeText(entry.item.name).includes(`CANTICO ${number}`));
+      if (!alreadyIncluded) entries.push({ sourceIndex: index, item: part('vida', `Cântico ${number} (intervalo)`, 3) });
+    });
+
+    entries.sort((a, b) => a.sourceIndex - b.sourceIndex);
+    return { weekLabel, parts: entries.map((entry) => entry.item) };
   }
 
   function openEditor() {
@@ -1345,7 +1514,7 @@ window.CRONOMETRO_CONFIG = {
         </div>
         <div class="erow-bottom">
           <input type="text" data-field="speaker" value="${esc(item.speaker)}" placeholder="Nome do orador">
-          <textarea data-field="details" placeholder="Detalhes / instruções">${esc(item.details)}</textarea>
+          <textarea data-field="details" placeholder="Detalhes / primeira pergunta de Joias Espirituais">${esc(item.details)}</textarea>
           <input type="url" data-field="link" value="${esc(item.link)}" placeholder="Link de referência">
         </div>`;
 
@@ -1421,12 +1590,14 @@ window.CRONOMETRO_CONFIG = {
         ordem: index + 1,
         secao: SECTION_LABELS[item.section],
         parte: item.name,
+        detalhes: displayDetails(item),
         orador: item.speaker,
         previstoSegundos: Math.round(planned / 1000),
         usadoSegundos: Math.round(used / 1000),
         diferencaSegundos: Math.round((used - planned) / 1000),
         comentarios: timer.comments,
         conselhoSegundos: Math.round(counselElapsedMsFor(item.id, at) / 1000),
+        resultadoTempo: evaluationLabel(timer.evaluation),
         concluida: timer.completed
       };
     });
@@ -1534,12 +1705,13 @@ window.CRONOMETRO_CONFIG = {
       const diff = row.diferencaSegundos * 1000;
       doc.text(`${diff > 0 ? '+' : diff < 0 ? '-' : ''}${formatCountdown(Math.abs(diff))}`, 178, y);
       y += 5.5;
-      if (item.countComments || item.hasCounsel) {
+      if (item.countComments || item.hasCounsel || state.timers[item.id].evaluation) {
         doc.setFontSize(7.8);
         doc.setTextColor(100, 95, 80);
         const notes = [
           item.countComments ? `${row.comentarios} comentário(s)` : '',
-          item.hasCounsel ? `conselho ${formatCountdown(row.conselhoSegundos * 1000)}` : ''
+          item.hasCounsel ? `conselho ${formatCountdown(row.conselhoSegundos * 1000)}` : '',
+          state.timers[item.id].evaluation ? `tempo: ${evaluationLabel(state.timers[item.id].evaluation).toLowerCase()}` : ''
         ].filter(Boolean).join(' · ');
         doc.text(notes, 16, y);
         doc.setTextColor(30, 30, 30);
@@ -1647,7 +1819,8 @@ window.CRONOMETRO_CONFIG = {
         speaker: item.speaker,
         plannedMs: plannedMs(item),
         elapsedMs: elapsedMsFor(item.id, at),
-        runningSince: state.timers[item.id].runningSince
+        runningSince: state.timers[item.id].runningSince,
+        evaluation: state.timers[item.id].evaluation
       } : null,
       next: state.parts[index + 1] ? {
         name: state.parts[index + 1].name,
@@ -1835,7 +2008,7 @@ window.CRONOMETRO_CONFIG = {
   function setupEvents() {
     $('playBtn').addEventListener('click', toggleCurrentPart);
     $('resetBtn').addEventListener('click', resetCurrentPart);
-    $('nextBtn').addEventListener('click', () => nextPart(false));
+    $('nextBtn').addEventListener('click', nextPart);
     $('prevBtn').addEventListener('click', previousPart);
     $('reopenFloatBtn').addEventListener('click', openFloat);
     $('floatClose').addEventListener('click', closeFloat);
@@ -1951,6 +2124,7 @@ window.CRONOMETRO_CONFIG = {
   function startRenderLoop() {
     setInterval(() => {
       const at = nowMs();
+      processAutomaticMeetingStart(at);
       processAlerts(at);
       updateLightDisplays(at);
       renderMeetingClock(at);

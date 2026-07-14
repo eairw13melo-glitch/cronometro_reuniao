@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#22314a">
+  <title>Apresentação — Cronômetro da reunião</title>
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="presentation-body">
+  <main class="presentation-shell">
+    <div class="presentation-top">
+      <span id="presentationWeek">Aguardando o controlador…</span>
+      <span class="presentation-code" id="presentationCode"></span>
+    </div>
+
+    <section class="presentation-connect" id="presentationConnect">
+      <span>Para acompanhar pela internet, informe o código da reunião:</span>
+      <input id="codeInput" maxlength="6" placeholder="ABC123" autocomplete="off">
+      <button class="btn-primary" id="connectBtn" type="button">Conectar</button>
+      <span class="presentation-status" id="presentationStatus">A tela também sincroniza automaticamente com outra aba neste dispositivo.</span>
+    </section>
+
+    <div class="presentation-section" id="presentationSection">—</div>
+    <h1 class="presentation-name" id="presentationName">Aguardando a reunião</h1>
+    <div class="presentation-speaker" id="presentationSpeaker"></div>
+    <div class="presentation-time" id="presentationTime">00:00</div>
+    <div class="presentation-next" id="presentationNext"></div>
+
+    <div class="presentation-actions">
+      <button id="fullscreenBtn" type="button">⛶ Tela cheia</button>
+      <button id="keepAwakeBtn" type="button">☀ Tela ligada</button>
+      <button id="closeConnectBtn" type="button">Ocultar conexão</button>
+    </div>
+  </main>
+
+  <script src="./config.js"></script>
+  <script defer src="./presentation.js"></script>
+</body>
+</html>

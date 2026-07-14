@@ -1279,7 +1279,7 @@
   }
 
   function updatePresentationLink() {
-    const url = new URL('./presentation.html', document.baseURI);
+    const url = new URL('/presentation.html', document.baseURI);
     if (state.cloud.shareCode) url.searchParams.set('code', state.cloud.shareCode);
     $('presentationLink').href = url.href;
     $('shareCode').value = state.cloud.shareCode || '';
@@ -1433,7 +1433,7 @@
   }
 
   async function copyPresentationLink() {
-    const url = new URL('./presentation.html', document.baseURI);
+    const url = new URL('/presentation.html', document.baseURI);
     if (state.cloud.shareCode) url.searchParams.set('code', state.cloud.shareCode);
     try {
       await navigator.clipboard.writeText(url.href);
@@ -1445,7 +1445,7 @@
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.warn));
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(console.warn));
     }
   }
 

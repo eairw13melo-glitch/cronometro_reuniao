@@ -29,7 +29,7 @@
         const keys = await caches.keys();
         await Promise.all(keys.map((key) => caches.delete(key)));
         status.textContent = 'Cache limpo. Abrindo a versão nova…';
-        setTimeout(() => location.replace('./index.html?cache=' + Date.now()), 700);
+        setTimeout(() => location.replace('/index.html?cache=' + Date.now()), 700);
       } catch (error) {
         status.textContent = 'Não foi possível limpar automaticamente: ' + error.message;
       }

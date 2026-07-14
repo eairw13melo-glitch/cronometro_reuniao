@@ -15,7 +15,10 @@ window.addEventListener('appinstalled', () => {
 export async function registerServiceWorker() {
   if (!('serviceWorker' in navigator) || !import.meta.env.PROD) return null;
   try {
-    return await navigator.serviceWorker.register('/service-worker.js');
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    return await navigator.serviceWorker.register(`${baseUrl}service-worker.js`, {
+      scope: baseUrl,
+    });
   } catch (error) {
     console.warn('Service worker não pôde ser registrado.', error);
     return null;

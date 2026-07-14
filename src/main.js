@@ -955,7 +955,7 @@ async function openPresentation() {
     try {
       await saveMeetingOnline(state, user);
       saveLocalState(state);
-      const url = new URL('/presentation.html', window.location.origin);
+      const url = new URL(`${import.meta.env.BASE_URL}presentation.html`, window.location.origin);
       url.searchParams.set('code', state.shareCode);
       window.open(url.href, '_blank', 'noopener');
       return;
@@ -965,7 +965,7 @@ async function openPresentation() {
     }
   }
   postLiveState();
-  window.open('/presentation.html', '_blank', 'noopener');
+  window.open(`${import.meta.env.BASE_URL}presentation.html`, '_blank', 'noopener');
 }
 
 async function resetMeeting() {

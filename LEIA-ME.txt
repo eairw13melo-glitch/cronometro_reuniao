@@ -1,0 +1,13 @@
+CRONÔMETRO — VERSÃO SEM CAMINHOS LOCAIS
+
+Envie SOMENTE estes arquivos para a raiz do repositório:
+- index.html
+- presentation.html
+- .nojekyll
+
+O CSS e o JavaScript estão dentro do index.html. Não existem style.css, script.js, src/, npm, Vite ou build.
+
+GitHub Pages: Settings > Pages > Deploy from a branch > main > /(root)
+
+Após publicar, abra uma vez:
+https://eairw13melo-glitch.github.io/cronometro_reuniao/?v=inline1

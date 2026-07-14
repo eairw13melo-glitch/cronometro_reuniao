@@ -124,7 +124,8 @@ h1{font-weight:600;font-size:clamp(24px,4vw,34px);margin:0;line-height:1.05}
 
 .panel{background:var(--navy-2);color:var(--paper);border-radius:16px;padding:20px 22px;margin-bottom:24px;display:none}
 .panel.show{display:block}.panel p{font-size:13px;color:#c7cfdb;margin:7px 0 12px;line-height:1.55}.panel code{color:#fff;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:5px}
-.importer textarea{width:100%;min-height:140px;border-radius:10px;border:none;padding:12px;font-size:13px;resize:vertical;background:#fff;color:var(--ink)}
+.importer textarea{width:100%;min-height:180px;border-radius:10px;border:none;padding:12px;font-size:13px;resize:vertical;background:#fff;color:var(--ink)}
+.import-file-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}.import-file-label{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.14);color:var(--paper);padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}.import-file-label:hover{background:rgba(255,255,255,.23)}.import-file-input{position:absolute;opacity:0;pointer-events:none}.import-file-name{font-size:12px;color:#c7cfdb}.import-mode-hint{display:block;margin-top:5px;font-size:12px;color:#c7cfdb}
 .open-link{color:#e8bf68;font-size:13px;font-weight:600;text-decoration:underline}.import-status,.cloud-status{font-size:12px;color:#c7cfdb}.import-status.error,.cloud-status.error{color:#ffb0b0}.import-status.success,.cloud-status.success{color:#b8e1c2}
 .btn-panel{background:rgba(255,255,255,.14);color:var(--paper)}.btn-panel:hover{background:rgba(255,255,255,.23)}
 .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0}.setting-option{font-size:13px;display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.08);padding:9px 11px;border-radius:8px}
@@ -228,10 +229,16 @@ footer{margin-top:30px;font-size:12px;color:var(--neutro);text-align:center;disp
     <section class="panel importer" id="importer" aria-labelledby="importTitle">
       <h2 id="importTitle">Gerar a programação da semana automaticamente</h2>
       <p>
-        Abra a apostila da semana no site oficial, copie o texto da página e cole abaixo. O aplicativo identifica as partes e os tempos escritos como “(X min)”.
+        Cole o texto comum ou o código HTML completo da apostila. O modo HTML extrai também perguntas, referências, lições, vídeos e outros detalhes da programação.
+        <span class="import-mode-hint">Você também pode selecionar um arquivo HTML, HTM ou TXT salvo no dispositivo.</span>
         <br><a class="open-link" href="https://wol.jw.org/pt/wol/meetings/r5/lp-t" target="_blank" rel="noopener noreferrer">Abrir a apostila desta semana em nova aba ↗</a>
       </p>
-      <textarea id="pasteBox" placeholder="Cole aqui o texto copiado da apostila da semana…"></textarea>
+      <div class="import-file-row">
+        <label class="import-file-label" for="programFile">📂 Selecionar arquivo</label>
+        <input class="import-file-input" id="programFile" type="file" accept=".html,.htm,.txt,text/html,text/plain">
+        <span class="import-file-name" id="programFileName">Nenhum arquivo selecionado</span>
+      </div>
+      <textarea id="pasteBox" placeholder="Cole aqui o texto ou o código HTML completo da apostila…"></textarea>
       <div class="irow">
         <button class="btn-primary" id="genBtn" type="button">Gerar programação</button>
         <button class="btn-panel" id="cancelImport" type="button">Cancelar</button>
@@ -1349,7 +1356,7 @@ window.CRONOMETRO_CONFIG = {
     return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
   }
 
-  function parseProgramText(raw) {
+  function parseProgramPlainText(raw) {
     const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
     const entries = [];
     const usedSongIndexes = new Set();
@@ -1475,6 +1482,199 @@ window.CRONOMETRO_CONFIG = {
 
     entries.sort((a, b) => a.sourceIndex - b.sourceIndex);
     return { weekLabel, parts: entries.map((entry) => entry.item) };
+  }
+
+
+  function cleanImportedText(value = '') {
+    return String(value)
+      .replace(/\u00a0/g, ' ')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\s*\n\s*/g, ' ')
+      .trim();
+  }
+
+  function importedAbsoluteUrl(value = '') {
+    if (!value) return '';
+    try {
+      const url = new URL(value, 'https://wol.jw.org');
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function looksLikeProgramHtml(raw) {
+    return /<article\b|<div\b[^>]*class=["'][^"']*bodyTxt|<h[1-6]\b/i.test(raw);
+  }
+
+  function extractMinutesFromImportedText(value = '') {
+    const match = String(value).match(/\((\d{1,3})\s*min\)/i);
+    return match ? Number(match[1]) : null;
+  }
+
+  function importedSectionFromHeading(value = '') {
+    const normalized = normalizeText(value);
+    if (normalized.includes('TESOUROS DA PALAVRA')) return 'tesouros';
+    if (normalized.includes('MELHOR NO MINISTERIO')) return 'ministerio';
+    if (normalized.includes('NOSSA VIDA CRISTA')) return 'vida';
+    return null;
+  }
+
+  function collectImportedBlockNodes(heading) {
+    const nodes = [];
+    let cursor = heading.nextElementSibling;
+    while (cursor) {
+      if (cursor.matches?.('h2,h3') || cursor.querySelector?.('h2,h3')) break;
+      nodes.push(cursor);
+      cursor = cursor.nextElementSibling;
+    }
+    return nodes;
+  }
+
+  function collectImportedParagraphs(nodes) {
+    const result = [];
+    const seen = new Set();
+    nodes.forEach((node) => {
+      const candidates = [];
+      if (node.matches?.('p')) candidates.push(node);
+      node.querySelectorAll?.('p').forEach((paragraph) => candidates.push(paragraph));
+      candidates.forEach((paragraph) => {
+        if (seen.has(paragraph)) return;
+        seen.add(paragraph);
+        const text = cleanImportedText(paragraph.textContent);
+        const normalized = normalizeText(text);
+        if (!text || normalized === 'SUA RESPOSTA' || /^\(\d{1,3}\s*MIN\)$/i.test(normalized)) return;
+        result.push({ element: paragraph, text });
+      });
+    });
+    return result;
+  }
+
+  function importedFirstLink(heading, blockNodes, preferredElement = null) {
+    const preferred = preferredElement?.querySelector?.('a[href]');
+    if (preferred) return importedAbsoluteUrl(preferred.getAttribute('href'));
+    const headingLink = heading.querySelector?.('a[href]');
+    if (headingLink) return importedAbsoluteUrl(headingLink.getAttribute('href'));
+    for (const node of blockNodes) {
+      const link = node.querySelector?.('a[href]');
+      if (link) return importedAbsoluteUrl(link.getAttribute('href'));
+    }
+    return '';
+  }
+
+  function parseProgramHtml(raw) {
+    const doc = new DOMParser().parseFromString(raw, 'text/html');
+    const article = doc.querySelector('article#article, article');
+    const root = article?.querySelector('.bodyTxt') || article;
+    if (!root) return { weekLabel: null, parts: [], mode: 'html' };
+
+    const header = article.querySelector('header');
+    const hiddenTitle = doc.querySelector('#contentTitle')?.value || '';
+    const week = cleanImportedText(header?.querySelector('h1')?.textContent || hiddenTitle);
+    const bibleReading = cleanImportedText(header?.querySelector('h2')?.textContent || '');
+    const weekLabel = [week, bibleReading].filter(Boolean).join(' · ');
+
+    const entries = [];
+    const headings = Array.from(root.querySelectorAll('h2,h3'));
+    let section = 'neutro';
+
+    headings.forEach((heading, headingIndex) => {
+      const headingText = cleanImportedText(heading.textContent);
+      if (!headingText) return;
+
+      if (heading.tagName === 'H2') {
+        section = importedSectionFromHeading(headingText) || section;
+        return;
+      }
+      if (heading.tagName !== 'H3') return;
+
+      const blockNodes = collectImportedBlockNodes(heading);
+      const paragraphs = collectImportedParagraphs(blockNodes);
+      const combinedText = [headingText, ...blockNodes.map((node) => cleanImportedText(node.textContent))].join(' ');
+      const normalizedHeading = normalizeText(headingText);
+      const songMatch = headingText.match(/C[âa]ntico\s+(\d+)/i);
+      let minutes = extractMinutesFromImportedText(combinedText);
+      let title = headingText.replace(/\s*\(\d{1,3}\s*min\)\s*/gi, ' ').replace(/\s+/g, ' ').trim();
+      let finalSection = section;
+      let details = '';
+      let preferredLinkElement = null;
+
+      if (normalizedHeading.includes('COMENTARIOS INICIAIS')) {
+        minutes = 1;
+        finalSection = 'neutro';
+        title = title || `${songMatch ? `Cântico ${songMatch[1]} e oração` : 'Cântico e oração'} | Comentários iniciais`;
+      } else if (normalizedHeading.includes('COMENTARIOS FINAIS')) {
+        minutes = 3;
+        finalSection = 'neutro';
+        title = title || 'Comentários finais | Cântico e oração';
+      } else if (songMatch && minutes === null) {
+        if (section === 'vida') {
+          entries.push({
+            sourceIndex: headingIndex,
+            item: part('vida', `Cântico ${songMatch[1]} (intervalo)`, 3, {
+              link: importedFirstLink(heading, blockNodes)
+            })
+          });
+        }
+        return;
+      } else if (minutes === null) {
+        return;
+      }
+
+      const normalizedTitle = normalizeText(title);
+      const isJewels = normalizedTitle.includes('JOIAS ESPIRITUAIS');
+      const isReading = normalizedTitle.includes('LEITURA DA BIBLIA');
+
+      if (isJewels) {
+        const firstQuestion = paragraphs.find((entry) => {
+          const normalized = normalizeText(entry.text);
+          return entry.text.includes('?') && !normalized.includes('QUE JOIAS ESPIRITUAIS VOCE ENCONTROU');
+        });
+        details = firstQuestion?.text || paragraphs[0]?.text || '';
+        preferredLinkElement = firstQuestion?.element || null;
+      } else {
+        const detailParts = [];
+        paragraphs.forEach((entry) => {
+          let text = entry.text.replace(/^\(\d{1,3}\s*min\)\s*/i, '').trim();
+          if (!text || normalizeText(text) === normalizeText(title)) return;
+          if (!detailParts.includes(text)) detailParts.push(text);
+        });
+
+        const imageDescriptions = [];
+        blockNodes.forEach((node) => {
+          node.querySelectorAll?.('img[alt]').forEach((image) => {
+            const alt = cleanImportedText(image.getAttribute('alt'));
+            if (alt && !imageDescriptions.includes(alt)) imageDescriptions.push(alt);
+          });
+        });
+        if (imageDescriptions.length && detailParts.length < 3) {
+          detailParts.push(`Imagem: ${imageDescriptions[0]}`);
+        }
+        details = detailParts.join(' • ');
+      }
+
+      const link = importedFirstLink(heading, blockNodes, preferredLinkElement);
+      entries.push({
+        sourceIndex: headingIndex,
+        item: part(finalSection, title, minutes, {
+          details,
+          link,
+          countComments: isJewels,
+          hasCounsel: finalSection === 'ministerio' || isReading
+        })
+      });
+    });
+
+    entries.sort((a, b) => a.sourceIndex - b.sourceIndex);
+    return { weekLabel, parts: entries.map((entry) => entry.item), mode: 'html' };
+  }
+
+  function parseProgramInput(raw) {
+    if (looksLikeProgramHtml(raw)) {
+      const htmlResult = parseProgramHtml(raw);
+      if (htmlResult.parts.length) return htmlResult;
+    }
+    return { ...parseProgramPlainText(raw), mode: 'texto' };
   }
 
   function openEditor() {
@@ -2019,6 +2219,24 @@ window.CRONOMETRO_CONFIG = {
     $('resetTotalBtn').addEventListener('click', resetMeeting);
     $('importToggle').addEventListener('click', () => showPanel('importer', !$('importer').classList.contains('show')));
     $('cancelImport').addEventListener('click', () => showPanel('importer', false));
+    $('programFile').addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        $('programFileName').textContent = 'Nenhum arquivo selecionado';
+        return;
+      }
+      $('programFileName').textContent = file.name;
+      try {
+        $('pasteBox').value = await file.text();
+        const mode = looksLikeProgramHtml($('pasteBox').value) ? 'HTML completo detectado' : 'texto simples detectado';
+        $('importStatus').textContent = `${mode}. Clique em “Gerar programação”.`;
+        $('importStatus').className = 'import-status success';
+      } catch (error) {
+        console.error(error);
+        $('importStatus').textContent = 'Não foi possível ler o arquivo selecionado.';
+        $('importStatus').className = 'import-status error';
+      }
+    });
     $('genBtn').addEventListener('click', () => {
       const raw = $('pasteBox').value;
       if (!raw.trim()) {
@@ -2026,12 +2244,16 @@ window.CRONOMETRO_CONFIG = {
         $('importStatus').className = 'import-status error';
         return;
       }
-      const parsed = parseProgramText(raw);
+      const parsed = parseProgramInput(raw);
       if (!parsed.parts.length) {
-        $('importStatus').textContent = 'Não encontrei partes com “(X min)”. Confira o texto colado.';
+        $('importStatus').textContent = 'Não encontrei uma programação válida. Cole o HTML completo ou um texto que contenha os tempos “(X min)”.';
         $('importStatus').className = 'import-status error';
         return;
       }
+      $('importStatus').textContent = parsed.mode === 'html'
+        ? 'HTML reconhecido: perguntas, referências e detalhes extraídos.'
+        : 'Texto simples reconhecido.';
+      $('importStatus').className = 'import-status success';
       pauseAllParts();
       pauseAllCounsels();
       state.parts = parsed.parts;
@@ -2039,9 +2261,11 @@ window.CRONOMETRO_CONFIG = {
       state.currentPartId = state.parts[0].id;
       if (parsed.weekLabel) state.weekLabel = parsed.weekLabel;
       $('pasteBox').value = '';
+      $('programFile').value = '';
+      $('programFileName').textContent = 'Nenhum arquivo selecionado';
       showPanel('importer', false);
       markChanged({ render: true });
-      toast(`${parsed.parts.length} partes importadas. Revise os títulos no editor.`, 'success');
+      toast(`${parsed.parts.length} partes importadas pelo modo ${parsed.mode === 'html' ? 'HTML completo' : 'texto simples'}.`, 'success');
     });
 
     $('settingsToggle').addEventListener('click', () => showPanel('settingsPanel', !$('settingsPanel').classList.contains('show')));

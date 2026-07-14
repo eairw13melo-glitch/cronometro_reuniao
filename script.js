@@ -1348,7 +1348,7 @@
     const email = $('authEmail').value.trim();
     if (!email) return setCloudStatus('Informe um e-mail válido.', 'error');
     setCloudStatus('Enviando link…');
-    const redirectTo = new URL('./index.html', document.baseURI).href;
+    const redirectTo = new URL('/index.html', document.baseURI).href;
     const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
     if (error) return setCloudStatus(error.message, 'error');
     setCloudStatus('Link enviado. Abra seu e-mail para entrar.', 'success');

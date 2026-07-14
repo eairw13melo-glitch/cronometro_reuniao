@@ -1,0 +1,30 @@
+name: Verificar projeto
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Instalar dependências
+        run: npm ci --no-audit --no-fund
+
+      - name: Executar testes
+        run: npm test
+
+      - name: Gerar build de produção
+        run: npm run build

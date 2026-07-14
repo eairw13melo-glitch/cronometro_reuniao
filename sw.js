@@ -1,7 +1,7 @@
 const CACHE_NAME = 'cronometro-reuniao-v1';
 const LOCAL_ASSETS = [
   './',
-  './index.html',
+  '/index.html',
   './presentation.html',
   './style.css',
   './script.js',
@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => caches.match(event.request).then((cached) => {
         if (cached) return cached;
-        if (event.request.mode === 'navigate') return caches.match('./index.html');
+        if (event.request.mode === 'navigate') return caches.match('/index.html');
         return Response.error();
       }))
   );

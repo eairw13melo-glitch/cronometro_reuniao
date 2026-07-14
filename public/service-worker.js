@@ -1,8 +1,21 @@
-const CACHE_NAME = 'vida-ministerio-v2.0.0';
-const APP_SHELL = ['/', '/index.html', '/presentation.html', '/manifest.webmanifest', '/icons/app-icon.svg', '/icons/maskable-icon.svg'];
+const CACHE_NAME = 'vida-ministerio-v2.1.0';
+const scopedUrl = (path = '') => new URL(path, self.registration.scope).toString();
+const APP_SHELL = [
+  '',
+  'index.html',
+  'presentation.html',
+  'manifest.webmanifest',
+  'icons/app-icon.svg',
+  'icons/maskable-icon.svg',
+].map(scopedUrl);
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -15,7 +28,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  const requestUrl = new URL(event.request.url);
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
@@ -25,7 +37,10 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
-        .catch(async () => (await caches.match(event.request)) || (await caches.match('/index.html'))),
+        .catch(async () => (
+          (await caches.match(event.request))
+          || (await caches.match(scopedUrl('index.html')))
+        )),
     );
     return;
   }

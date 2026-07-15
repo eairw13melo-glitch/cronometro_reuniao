@@ -1,6 +1,159 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#22314a"><title>Apresentação — Cronômetro</title><style>
-:root{--paper:#f2ede1;--navy:#22314a;--gold:#b3862c;--danger:#dc6b6b;--muted:#c7cfdb}*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--navy);color:var(--paper);font-family:Arial,sans-serif;display:grid;place-items:center;padding:24px}.card{width:min(980px,100%);text-align:center}.week{font-size:clamp(14px,2vw,20px);color:var(--muted);margin-bottom:18px}.section{display:inline-block;padding:7px 15px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:clamp(11px,1.6vw,16px)}.name{font-family:Georgia,serif;font-size:clamp(32px,6vw,76px);line-height:1.08;margin:24px auto 10px;max-width:900px}.speaker{color:var(--gold);font-size:clamp(17px,2.5vw,28px);min-height:1.4em}.time{font-family:Georgia,serif;font-variant-numeric:tabular-nums;font-size:clamp(92px,20vw,220px);font-weight:700;line-height:1;margin:34px 0 24px}.time.over{color:var(--danger)}.next{font-size:clamp(14px,2vw,22px);color:var(--muted)}.status{position:fixed;bottom:12px;right:16px;color:var(--muted);font-size:12px}
-</style></head><body><main class="card"><div class="week" id="week">Aguardando o controlador…</div><div class="section" id="section">—</div><h1 class="name" id="name">Abra o cronômetro em outra aba</h1><div class="speaker" id="speaker"></div><div class="time" id="time">00:00</div><div class="next" id="next"></div></main><div class="status" id="status">Sincronização local</div><script>
-(function(){'use strict';var KEY='cronometro_vida_ministerio_presentation_v4';var CHANNEL='cronometro_vida_ministerio_channel_v4';var payload=null;function $(id){return document.getElementById(id)}function read(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}function fmt(ms){var over=ms<0;var s=Math.floor(Math.abs(ms)/1000);var m=String(Math.floor(s/60)).padStart(2,'0');var sec=String(s%60).padStart(2,'0');return(over?'+':'')+m+':'+sec}function elapsed(){if(!payload||!payload.current)return 0;var value=Number(payload.current.elapsedMs)||0;if(payload.current.runningSince){var base=Date.parse(payload.updatedAt)||Date.now();value+=Math.max(0,Date.now()-base)}return value}function render(){if(!payload||!payload.current)return;var c=payload.current;var remaining=(Number(c.plannedMs)||0)-elapsed();$('week').textContent=payload.weekLabel||'';$('section').textContent=c.section||'—';$('name').textContent=(c.name||'Parte')+(c.evaluation==='good'?' 👍🏾':c.evaluation==='bad'?' 👎🏿':'');$('speaker').textContent=c.speaker?'Orador: '+c.speaker:'';$('time').textContent=fmt(remaining);$('time').classList.toggle('over',remaining<0);$('next').textContent=payload.next?'Próxima: '+payload.next.name:'';$('status').textContent='Atualizado '+new Date(payload.updatedAt).toLocaleTimeString('pt-BR')}function receive(data){if(data&&data.current){payload=data;render()}}receive(read());window.addEventListener('storage',function(e){if(e.key===KEY)receive(read())});if('BroadcastChannel'in window){var bc=new BroadcastChannel(CHANNEL);bc.onmessage=function(e){receive(e.data)}}setInterval(render,250)})();
-</script></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#22314a">
+  <title>Apresentação — Cronômetro</title>
+  <style>
+    :root{--paper:#f2ede1;--navy:#22314a;--gold:#b3862c;--danger:#dc6b6b;--muted:#c7cfdb;--good:#9bd3a8}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--navy);color:var(--paper);font-family:Arial,sans-serif;display:grid;place-items:center;padding:24px}
+    .card{width:min(980px,100%);text-align:center}.week{font-size:clamp(14px,2vw,20px);color:var(--muted);margin-bottom:18px}.section{display:inline-block;padding:7px 15px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:clamp(11px,1.6vw,16px)}
+    .name{font-family:Georgia,serif;font-size:clamp(32px,6vw,76px);line-height:1.08;margin:24px auto 10px;max-width:900px}.speaker{color:var(--gold);font-size:clamp(17px,2.5vw,28px);min-height:1.4em}.time{font-family:Georgia,serif;font-variant-numeric:tabular-nums;font-size:clamp(92px,20vw,220px);font-weight:700;line-height:1;margin:34px 0 24px}.time.over{color:var(--danger)}.next{font-size:clamp(14px,2vw,22px);color:var(--muted)}
+    .status{position:fixed;bottom:12px;right:16px;color:var(--muted);font-size:12px;max-width:min(90vw,520px);text-align:right}.status.online{color:var(--good)}.status.error{color:#ff9e9e}.code{position:fixed;left:16px;bottom:12px;color:var(--muted);font-size:12px}.code b{color:var(--gold);letter-spacing:.08em}
+  </style>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="card">
+    <div class="week" id="week">Aguardando o controlador…</div>
+    <div class="section" id="section">—</div>
+    <h1 class="name" id="name">Abra esta tela pelo cronômetro principal</h1>
+    <div class="speaker" id="speaker"></div>
+    <div class="time" id="time">00:00</div>
+    <div class="next" id="next"></div>
+  </main>
+  <div class="code" id="codeWrap" hidden>Código: <b id="code"></b></div>
+  <div class="status" id="status">Iniciando sincronização…</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var LOCAL_KEY='cronometro_vida_ministerio_presentation_v4';
+  var LOCAL_CHANNEL='cronometro_vida_ministerio_channel_v4';
+  var payload=null;
+  var supabaseClient=null;
+  var realtimeChannel=null;
+  var onlineCode=(new URLSearchParams(location.search).get('code')||'').trim().toUpperCase();
+  var refreshTimer=null;
+
+  function $(id){return document.getElementById(id)}
+  function configured(){
+    var config=window.CRONOMETRO_CONFIG||{};
+    return Boolean(config.supabaseUrl&&config.supabasePublishableKey&&window.supabase&&window.supabase.createClient);
+  }
+  function setStatus(message,type){
+    $('status').textContent=message;
+    $('status').className='status'+(type?' '+type:'');
+  }
+  function readLocal(){
+    try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'null')}catch(e){return null}
+  }
+  function fmt(ms){
+    var over=ms<0;
+    var seconds=Math.floor(Math.abs(ms)/1000);
+    var minutes=String(Math.floor(seconds/60)).padStart(2,'0');
+    var rest=String(seconds%60).padStart(2,'0');
+    return(over?'+':'')+minutes+':'+rest;
+  }
+  function elapsed(){
+    if(!payload||!payload.current)return 0;
+    var value=Number(payload.current.elapsedMs)||0;
+    if(payload.current.runningSince){
+      var base=Date.parse(payload.updatedAt)||Date.now();
+      value+=Math.max(0,Date.now()-base);
+    }
+    return value;
+  }
+  function render(){
+    if(!payload||!payload.current)return;
+    var current=payload.current;
+    var remaining=(Number(current.plannedMs)||0)-elapsed();
+    $('week').textContent=payload.weekLabel||'';
+    $('section').textContent=current.section||'—';
+    $('name').textContent=(current.name||'Parte')+(current.evaluation==='good'?' 👍🏾':current.evaluation==='bad'?' 👎🏿':'');
+    $('speaker').textContent=current.speaker?'Orador: '+current.speaker:'';
+    $('time').textContent=fmt(remaining);
+    $('time').classList.toggle('over',remaining<0);
+    $('next').textContent=payload.next?'Próxima: '+payload.next.name:'';
+  }
+  function receive(data,source){
+    if(!data||!data.current)return;
+    payload=data;
+    render();
+    var updated=Date.parse(data.updatedAt);
+    var time=Number.isFinite(updated)?new Date(updated).toLocaleTimeString('pt-BR'):'agora';
+    setStatus((source==='online'?'Online':'Local')+' · atualizado '+time,source==='online'?'online':'');
+  }
+
+  async function refreshFromCloud(){
+    if(!supabaseClient||!onlineCode)return;
+    var response=await supabaseClient.rpc('get_meeting_presentation',{p_share_code:onlineCode});
+    if(response.error){
+      setStatus('Falha ao carregar: '+response.error.message,'error');
+      return;
+    }
+    if(!response.data){
+      setStatus('Código de reunião não encontrado.','error');
+      return;
+    }
+    receive(response.data,'online');
+  }
+
+  async function connectOnline(){
+    $('code').textContent=onlineCode;
+    $('codeWrap').hidden=false;
+    var config=window.CRONOMETRO_CONFIG;
+    supabaseClient=window.supabase.createClient(config.supabaseUrl,config.supabasePublishableKey,{
+      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+    });
+
+    setStatus('Conectando ao Supabase…');
+    await refreshFromCloud();
+
+    realtimeChannel=supabaseClient
+      .channel('presentation:'+onlineCode,{config:{broadcast:{self:false}}})
+      .on('broadcast',{event:'state'},function(message){receive(message.payload,'online')})
+      .subscribe(function(status){
+        if(status==='SUBSCRIBED')setStatus('Online · aguardando atualizações','online');
+        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setStatus('Conexão instável; tentando novamente…','error');
+        else if(status==='CLOSED')setStatus('Conexão encerrada.','error');
+      });
+
+    refreshTimer=setInterval(refreshFromCloud,15000);
+    window.addEventListener('online',refreshFromCloud);
+    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')refreshFromCloud()});
+  }
+
+  function connectLocal(){
+    receive(readLocal(),'local');
+    window.addEventListener('storage',function(event){if(event.key===LOCAL_KEY)receive(readLocal(),'local')});
+    if('BroadcastChannel'in window){
+      var bc=new BroadcastChannel(LOCAL_CHANNEL);
+      bc.onmessage=function(event){receive(event.data,'local')};
+    }
+    if(!payload)setStatus('Abra o cronômetro principal em outra aba deste dispositivo.');
+  }
+
+  if(onlineCode&&configured()){
+    connectOnline().catch(function(error){
+      console.error(error);
+      setStatus('Não foi possível conectar ao Supabase.','error');
+      connectLocal();
+    });
+  }else{
+    if(onlineCode&&!configured())setStatus('Supabase não configurado em config.js.','error');
+    connectLocal();
+  }
+
+  setInterval(render,250);
+  window.addEventListener('beforeunload',function(){
+    if(refreshTimer)clearInterval(refreshTimer);
+    if(realtimeChannel&&supabaseClient)supabaseClient.removeChannel(realtimeChannel);
+  });
+})();
+</script>
+</body>
+</html>

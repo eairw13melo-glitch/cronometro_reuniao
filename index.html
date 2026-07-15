@@ -10,10 +10,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./config.js"></script>
 
 <script>
 (function(){
-  var VERSION='cronometro-inline-2026-07-14-v2';
+  var VERSION='cronometro-online-2026-07-15-v1';
   try {
     if (localStorage.getItem('cronometro_inline_version') !== VERSION) {
       localStorage.setItem('cronometro_inline_version', VERSION);
@@ -262,7 +263,7 @@ footer{margin-top:30px;font-size:12px;color:var(--neutro);text-align:center;disp
 
     <section class="panel cloud-panel" id="cloudPanel" aria-labelledby="cloudTitle">
       <h2 id="cloudTitle">Sincronização com Supabase</h2>
-      <p id="cloudDescription">O cronômetro funciona normalmente sem conta. Configure o Supabase em <code>config.js</code> para habilitar login, backup e apresentação online.</p>
+      <p id="cloudDescription">O cronômetro funciona normalmente sem conta. Configure o Supabase em <code>config.js</code> para habilitar login, backup entre dispositivos e apresentação em tempo real.</p>
       <div id="cloudUnavailable" class="notice">Supabase ainda não configurado.</div>
       <div id="cloudAvailable" hidden>
         <div class="cloud-auth-row" id="cloudSignedOut">
@@ -379,18 +380,6 @@ footer{margin-top:30px;font-size:12px;color:var(--neutro);text-align:center;disp
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<script>
-/*
-  CONFIGURAÇÃO OPCIONAL DO SUPABASE
-  A chave publishable/anon pode ficar no navegador quando as políticas RLS do schema.sql estiverem habilitadas.
-  Nunca coloque a service_role aqui.
-*/
-window.CRONOMETRO_CONFIG = {
-  supabaseUrl: '',
-  supabasePublishableKey: ''
-};
-
-</script>
 <script>
 (() => {
   'use strict';
@@ -634,7 +623,10 @@ window.CRONOMETRO_CONFIG = {
   let broadcastChannel = null;
   let supabaseClient = null;
   let cloudUser = null;
-  let realtimeChannel = null;
+  let presentationRealtimeChannel = null;
+  let meetingRealtimeChannel = null;
+  let presentationRealtimeReady = false;
+  let applyingCloudState = false;
   let autoNextTimeout = null;
   let toastTimeout = null;
   let lastLightRenderSecond = -1;
@@ -743,10 +735,10 @@ window.CRONOMETRO_CONFIG = {
     if (render) renderAll();
   }
 
-  function forceLocalSave() {
+  function forceLocalSave({ touch = true } = {}) {
     clearTimeout(saveTimer);
     try {
-      state.updatedAt = new Date().toISOString();
+      if (touch) state.updatedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       localStorage.setItem(PRESENTATION_KEY, JSON.stringify(getPresentationPayload()));
     } catch (error) {
@@ -2033,8 +2025,12 @@ window.CRONOMETRO_CONFIG = {
     const payload = getPresentationPayload();
     try { localStorage.setItem(PRESENTATION_KEY, JSON.stringify(payload)); } catch {}
     try { broadcastChannel?.postMessage(payload); } catch {}
-    if (realtimeChannel) {
-      realtimeChannel.send({ type: 'broadcast', event: 'state', payload }).catch?.(() => {});
+    if (presentationRealtimeChannel && presentationRealtimeReady) {
+      Promise.resolve(presentationRealtimeChannel.send({
+        type: 'broadcast',
+        event: 'state',
+        payload
+      })).catch(() => {});
     }
   }
 
@@ -2082,25 +2078,44 @@ window.CRONOMETRO_CONFIG = {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
 
-    const { data } = await supabaseClient.auth.getSession();
-    cloudUser = data.session?.user || null;
-    renderCloudAuth();
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) setCloudStatus(`Falha ao recuperar a sessão: ${error.message}`, 'error');
+    await handleCloudSession(data?.session || null, { initial: true });
+
     supabaseClient.auth.onAuthStateChange((_event, session) => {
-      cloudUser = session?.user || null;
-      renderCloudAuth();
-      if (cloudUser && state.cloud.meetingId) connectRealtime();
+      setTimeout(() => {
+        handleCloudSession(session).catch((sessionError) => {
+          console.error(sessionError);
+          setCloudStatus('Não foi possível atualizar a sessão do Supabase.', 'error');
+        });
+      }, 0);
     });
-    if (cloudUser && state.cloud.meetingId) {
-      await loadCloudMeeting();
-      connectRealtime();
+  }
+
+  async function handleCloudSession(session, { initial = false } = {}) {
+    cloudUser = session?.user || null;
+    renderCloudAuth();
+
+    if (!cloudUser) {
+      disconnectRealtime();
+      if (!initial) setCloudStatus('Sessão encerrada.');
+      return;
     }
+
+    if (state.cloud.meetingId) {
+      await loadCloudMeeting({ force: false, silent: initial });
+      if (!state.cloud.meetingId) await loadLatestCloudMeeting({ silent: initial });
+    } else {
+      await loadLatestCloudMeeting({ silent: initial });
+    }
+    connectRealtime();
   }
 
   function renderCloudAuth() {
     $('cloudSignedOut').hidden = Boolean(cloudUser);
     $('cloudSignedIn').hidden = !cloudUser;
     $('cloudUserEmail').textContent = cloudUser?.email || '';
-    $('createCloudMeetingBtn').textContent = state.cloud.meetingId ? 'Recriar reunião online' : 'Criar reunião online';
+    $('createCloudMeetingBtn').textContent = state.cloud.meetingId ? 'Criar nova reunião online' : 'Criar reunião online';
     updatePresentationLink();
   }
 
@@ -2109,87 +2124,216 @@ window.CRONOMETRO_CONFIG = {
     if (!email) return setCloudStatus('Informe um e-mail válido.', 'error');
     setCloudStatus('Enviando link…');
     const redirectTo = new URL('./index.html', document.baseURI).href;
-    const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
     if (error) return setCloudStatus(error.message, 'error');
     setCloudStatus('Link enviado. Abra seu e-mail para entrar.', 'success');
   }
 
   async function logoutCloud() {
-    await supabaseClient.auth.signOut();
+    disconnectRealtime();
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) return setCloudStatus(error.message, 'error');
     setCloudStatus('Sessão encerrada.');
   }
 
   async function createCloudMeeting() {
     if (!cloudUser) return setCloudStatus('Entre com seu e-mail primeiro.', 'error');
-    const shareCode = randomShareCode();
     setCloudStatus('Criando reunião online…');
-    const cloudState = clone(state);
-    const { data, error } = await supabaseClient
-      .from('meeting_states')
-      .insert({ owner_id: cloudUser.id, share_code: shareCode, title: state.weekLabel, state: cloudState })
-      .select('id, share_code')
-      .single();
-    if (error) return setCloudStatus(error.message, 'error');
-    state.cloud.meetingId = data.id;
-    state.cloud.shareCode = data.share_code;
-    state.cloud.lastSyncedAt = new Date().toISOString();
-    forceLocalSave();
+
+    let result = null;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const shareCode = randomShareCode();
+      const publicState = getPresentationPayload();
+      publicState.shareCode = shareCode;
+      const response = await supabaseClient
+        .from('meeting_states')
+        .insert({
+          owner_id: cloudUser.id,
+          share_code: shareCode,
+          title: state.weekLabel,
+          state: clone(state),
+          public_state: publicState
+        })
+        .select('id, share_code, updated_at')
+        .single();
+      if (!response.error) {
+        result = response.data;
+        break;
+      }
+      if (response.error.code !== '23505') {
+        return setCloudStatus(response.error.message, 'error');
+      }
+    }
+
+    if (!result) return setCloudStatus('Não foi possível gerar um código exclusivo. Tente novamente.', 'error');
+
+    state.cloud.meetingId = result.id;
+    state.cloud.shareCode = result.share_code;
+    state.cloud.lastSyncedAt = result.updated_at || new Date().toISOString();
+    forceLocalSave({ touch: false });
     renderCloudAuth();
     connectRealtime();
+    const saved = await saveCloudNow({ silent: true });
+    if (!saved) return;
     broadcastPresentation();
     setCloudStatus('Reunião online criada e sincronizada.', 'success');
   }
 
-  async function loadCloudMeeting() {
-    if (!cloudUser || !state.cloud.meetingId) return;
+  async function loadLatestCloudMeeting({ silent = false } = {}) {
+    if (!cloudUser) return false;
     const { data, error } = await supabaseClient
       .from('meeting_states')
-      .select('state, share_code, updated_at')
-      .eq('id', state.cloud.meetingId)
-      .single();
+      .select('id, share_code, state, updated_at')
+      .eq('owner_id', cloudUser.id)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     if (error) {
-      setCloudStatus(`Não foi possível carregar a reunião online: ${error.message}`, 'error');
-      return;
+      if (!silent) setCloudStatus(`Não foi possível procurar reuniões online: ${error.message}`, 'error');
+      return false;
     }
-    if (data?.state && new Date(data.updated_at).getTime() > new Date(state.updatedAt).getTime()) {
-      const localCloud = { ...state.cloud, shareCode: data.share_code };
+    if (!data) {
+      if (!silent) setCloudStatus('Nenhuma reunião online encontrada. Crie a primeira.', 'success');
+      return false;
+    }
+
+    applyCloudMeetingRecord(data, { force: true });
+    if (!silent) setCloudStatus('Reunião online mais recente carregada.', 'success');
+    return true;
+  }
+
+  function applyCloudMeetingRecord(data, { force = false } = {}) {
+    if (!data?.state) return false;
+    const remoteUpdatedAt = Date.parse(data.updated_at || '') || 0;
+    const localSyncedAt = Date.parse(state.cloud.lastSyncedAt || '') || 0;
+    if (!force && remoteUpdatedAt <= localSyncedAt) {
+      state.cloud.meetingId = data.id || state.cloud.meetingId;
+      state.cloud.shareCode = data.share_code || state.cloud.shareCode;
+      renderCloudAuth();
+      return false;
+    }
+
+    applyingCloudState = true;
+    try {
+      const cloudMetadata = {
+        meetingId: data.id || state.cloud.meetingId,
+        shareCode: data.share_code || state.cloud.shareCode,
+        lastSyncedAt: data.updated_at || new Date().toISOString()
+      };
       state = normalizeState(data.state);
-      state.cloud = localCloud;
-      forceLocalSave();
+      state.cloud = cloudMetadata;
+      forceLocalSave({ touch: false });
       renderAll();
-      setCloudStatus('Versão mais recente carregada da nuvem.', 'success');
+      renderCloudAuth();
+      return true;
+    } finally {
+      applyingCloudState = false;
     }
+  }
+
+  async function loadCloudMeeting({ force = false, silent = false } = {}) {
+    if (!cloudUser || !state.cloud.meetingId) return false;
+    const { data, error } = await supabaseClient
+      .from('meeting_states')
+      .select('id, state, share_code, updated_at')
+      .eq('id', state.cloud.meetingId)
+      .maybeSingle();
+    if (error) {
+      if (!silent) setCloudStatus(`Não foi possível carregar a reunião online: ${error.message}`, 'error');
+      return false;
+    }
+    if (!data) {
+      state.cloud.meetingId = null;
+      state.cloud.shareCode = null;
+      state.cloud.lastSyncedAt = null;
+      forceLocalSave({ touch: false });
+      renderCloudAuth();
+      if (!silent) setCloudStatus('A reunião online não existe mais.', 'error');
+      return false;
+    }
+
+    const changed = applyCloudMeetingRecord(data, { force });
+    if (changed && !silent) setCloudStatus('Versão mais recente carregada da nuvem.', 'success');
+    return changed;
   }
 
   function scheduleCloudSave() {
-    if (!supabaseClient || !cloudUser || !state.cloud.meetingId) return;
+    if (!supabaseClient || !cloudUser || !state.cloud.meetingId || applyingCloudState) return;
     clearTimeout(cloudSaveTimer);
-    cloudSaveTimer = setTimeout(saveCloudNow, CLOUD_SAVE_DELAY_MS);
+    cloudSaveTimer = setTimeout(() => saveCloudNow(), CLOUD_SAVE_DELAY_MS);
   }
 
-  async function saveCloudNow() {
-    if (!supabaseClient || !cloudUser || !state.cloud.meetingId) return;
+  async function saveCloudNow({ silent = false } = {}) {
+    if (!supabaseClient || !cloudUser || !state.cloud.meetingId || applyingCloudState) return false;
     clearTimeout(cloudSaveTimer);
-    setCloudStatus('Sincronizando…');
-    const cloudState = clone(state);
-    const { error } = await supabaseClient
+    if (!silent) setCloudStatus('Sincronizando…');
+
+    const publicState = getPresentationPayload();
+    publicState.shareCode = state.cloud.shareCode;
+    const { data, error } = await supabaseClient
       .from('meeting_states')
-      .update({ title: state.weekLabel, state: cloudState })
-      .eq('id', state.cloud.meetingId);
-    if (error) return setCloudStatus(error.message, 'error');
-    state.cloud.lastSyncedAt = new Date().toISOString();
-    forceLocalSave();
+      .update({
+        title: state.weekLabel,
+        state: clone(state),
+        public_state: publicState
+      })
+      .eq('id', state.cloud.meetingId)
+      .select('updated_at')
+      .single();
+
+    if (error) {
+      setCloudStatus(error.message, 'error');
+      return false;
+    }
+    state.cloud.lastSyncedAt = data?.updated_at || new Date().toISOString();
+    forceLocalSave({ touch: false });
     broadcastPresentation();
-    setCloudStatus(`Sincronizado às ${new Date().toLocaleTimeString('pt-BR')}.`, 'success');
+    if (!silent) setCloudStatus(`Sincronizado às ${new Date().toLocaleTimeString('pt-BR')}.`, 'success');
+    return true;
+  }
+
+  function disconnectRealtime() {
+    presentationRealtimeReady = false;
+    if (presentationRealtimeChannel && supabaseClient) {
+      supabaseClient.removeChannel(presentationRealtimeChannel).catch?.(() => {});
+    }
+    if (meetingRealtimeChannel && supabaseClient) {
+      supabaseClient.removeChannel(meetingRealtimeChannel).catch?.(() => {});
+    }
+    presentationRealtimeChannel = null;
+    meetingRealtimeChannel = null;
   }
 
   function connectRealtime() {
-    if (!supabaseClient || !state.cloud.shareCode) return;
-    if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
-    realtimeChannel = supabaseClient.channel(`presentation:${state.cloud.shareCode}`);
-    realtimeChannel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') broadcastPresentation();
+    if (!supabaseClient || !cloudUser || !state.cloud.shareCode || !state.cloud.meetingId) return;
+    disconnectRealtime();
+
+    presentationRealtimeChannel = supabaseClient.channel(`presentation:${state.cloud.shareCode}`, {
+      config: { broadcast: { self: false, ack: true } }
     });
+    presentationRealtimeChannel.subscribe((status) => {
+      presentationRealtimeReady = status === 'SUBSCRIBED';
+      if (presentationRealtimeReady) broadcastPresentation();
+    });
+
+    meetingRealtimeChannel = supabaseClient
+      .channel(`meeting-state:${state.cloud.meetingId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'meeting_states',
+        filter: `id=eq.${state.cloud.meetingId}`
+      }, (payload) => {
+        const remoteUpdatedAt = Date.parse(payload.new?.updated_at || '') || 0;
+        const localSyncedAt = Date.parse(state.cloud.lastSyncedAt || '') || 0;
+        if (remoteUpdatedAt <= localSyncedAt) return;
+        loadCloudMeeting({ force: true, silent: true }).catch(console.error);
+      })
+      .subscribe();
   }
 
   async function copyPresentationLink() {
@@ -2331,7 +2475,7 @@ window.CRONOMETRO_CONFIG = {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && isAnyRunning()) requestWakeLock();
     });
-    window.addEventListener('beforeunload', forceLocalSave);
+    window.addEventListener('beforeunload', () => { forceLocalSave(); disconnectRealtime(); });
     window.addEventListener('storage', (event) => {
       if (event.key === STORAGE_KEY && event.newValue) {
         try {

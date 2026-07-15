@@ -1,21 +1,41 @@
-CRONÔMETRO VIDA E MINISTÉRIO — ATUALIZAÇÃO
+CRONÔMETRO VIDA E MINISTÉRIO — VERSÃO 5
 
-Envie estes três arquivos para a raiz do repositório:
-- index.html
-- presentation.html
+PARA ATUALIZAR O GITHUB PAGES
+
+Substitua ou envie TODOS os arquivos deste pacote para a raiz do repositório.
+Não envie somente o index.html, pois agora o projeto usa app.js, styles.css,
+service worker, manifesto e ícones separados.
+
+ARQUIVOS ESSENCIAIS
 - .nojekyll
+- index.html
+- styles.css
+- app.js
+- presentation.html
+- config.js
+- manifest.webmanifest
+- sw.js
+- icon.svg
+- icon-192.png
+- icon-512.png
 
-GitHub Pages:
-Source: Deploy from a branch
-Branch: main
-Folder: / (root)
+SUPABASE
+- Mantenha config.js com a URL e a chave pública do seu projeto.
+- Nunca use a chave service_role.
+- Execute novamente o schema.sql para criar a tabela de histórico online.
+- O schema.sql pode ser executado novamente com segurança.
 
-Após publicar, abra o site com ?v=2 para evitar cache antigo.
+NOVIDADES
+- data da reunião e início real corrigido;
+- reset preserva a reunião online;
+- finalizar para todos os cronômetros e arquiva de verdade;
+- histórico sincronizado junto da reunião online;
+- backup completo para baixar e restaurar;
+- restauração compatível com JSON das versões anteriores;
+- funcionamento offline/PWA;
+- opção para ocultar o nome do orador na apresentação;
+- código separado em HTML, CSS e JavaScript para facilitar manutenção.
 
-Alterações:
-- abertura e encerramento em blocos únicos;
-- Próxima inicia a parte seguinte imediatamente;
-- Joias mostra a pergunta específica e a pergunta aberta;
-- reunião inicia automaticamente no horário programado;
-- botão de início é apenas contingência;
-- avaliação de tempo com margem de ±5 segundos: 👍🏾 ou 👎🏿.
+BACKUP
+Use “Baixar backup” para salvar reunião atual + histórico.
+Use “Restaurar backup” para selecionar o arquivo JSON e confirmar a restauração.

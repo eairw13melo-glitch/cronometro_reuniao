@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#22314a">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <title>Apresentação — Cronômetro</title>
   <style>
     :root{--paper:#f2ede1;--navy:#22314a;--gold:#b3862c;--danger:#dc6b6b;--muted:#c7cfdb;--good:#9bd3a8}
@@ -79,8 +81,16 @@
     $('time').classList.toggle('over',remaining<0);
     $('next').textContent=payload.next?'Próxima: '+payload.next.name:'';
   }
+  function validPayload(data,source){
+    if(!data||typeof data!=='object'||!data.current||typeof data.current!=='object')return false;
+    if(Number(data.version)!==1||!Number.isFinite(Date.parse(data.updatedAt||'')))return false;
+    if(typeof data.current.name!=='string'||data.current.name.length>300)return false;
+    if(!Number.isFinite(Number(data.current.plannedMs))||Number(data.current.plannedMs)<0)return false;
+    if(source==='online'&&String(data.shareCode||'').trim().toUpperCase()!==onlineCode)return false;
+    return true;
+  }
   function receive(data,source){
-    if(!data||!data.current)return;
+    if(!validPayload(data,source))return;
     payload=data;
     render();
     var updated=Date.parse(data.updatedAt);
@@ -146,6 +156,10 @@
   }else{
     if(onlineCode&&!configured())setStatus('Supabase não configurado em config.js.','error');
     connectLocal();
+  }
+
+  if('serviceWorker'in navigator&&window.isSecureContext){
+    navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(function(error){console.warn('Modo offline indisponível.',error)});
   }
 
   setInterval(render,250);

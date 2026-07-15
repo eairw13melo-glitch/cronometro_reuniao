@@ -70,6 +70,53 @@ on public.meeting_states for delete
 to authenticated
 using ((select auth.uid()) = owner_id);
 
+-- Histórico sincronizado em registros separados para não aumentar o estado da reunião ativa.
+create table if not exists public.meeting_archives (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  local_id text not null,
+  archived_at timestamptz not null,
+  title text not null default '',
+  total_planned_ms bigint not null default 0,
+  total_used_ms bigint not null default 0,
+  snapshot jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  unique (owner_id, local_id)
+);
+
+create index if not exists meeting_archives_owner_archived_idx
+  on public.meeting_archives (owner_id, archived_at desc);
+
+alter table public.meeting_archives enable row level security;
+
+revoke all on table public.meeting_archives from anon;
+grant select, insert, update, delete on table public.meeting_archives to authenticated;
+
+drop policy if exists "owners can read archives" on public.meeting_archives;
+create policy "owners can read archives"
+on public.meeting_archives for select
+to authenticated
+using ((select auth.uid()) = owner_id);
+
+drop policy if exists "owners can create archives" on public.meeting_archives;
+create policy "owners can create archives"
+on public.meeting_archives for insert
+to authenticated
+with check ((select auth.uid()) = owner_id);
+
+drop policy if exists "owners can update archives" on public.meeting_archives;
+create policy "owners can update archives"
+on public.meeting_archives for update
+to authenticated
+using ((select auth.uid()) = owner_id)
+with check ((select auth.uid()) = owner_id);
+
+drop policy if exists "owners can delete archives" on public.meeting_archives;
+create policy "owners can delete archives"
+on public.meeting_archives for delete
+to authenticated
+using ((select auth.uid()) = owner_id);
+
 -- A tela pública recebe somente o resumo necessário, nunca o estado completo.
 create or replace function public.get_meeting_presentation(p_share_code text)
 returns jsonb

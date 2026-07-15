@@ -6,6 +6,6 @@
   3. Nunca use a chave service_role neste arquivo.
 */
 window.CRONOMETRO_CONFIG = {
-  supabaseUrl: '',
-  supabasePublishableKey: ''
+  supabaseUrl: 'https://xozyhgyxtgcckxrebxpt.supabase.co/rest/v1/',
+  supabasePublishableKey: 'sb_publishable_wo-pzlQ_741ESNmKOTFvRg_m9HYSJOG'
 };
